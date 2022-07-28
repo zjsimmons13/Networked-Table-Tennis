@@ -42,10 +42,16 @@ namespace Unity.Netcode{
         public void UnRegisterUser(ulong clientID) {
             if (_user1 == clientID) _user1 = 0;
             else if (_user2 == clientID) _user2 = 0;
+            if(!NetworkManager.Singleton.IsServer) return;
+            if (_user1 == 0 && _user2 == 0) {
+                _gm.gamePlayable.Value = false;
+                _gm.RestartServer();
+            }
         }
         public override void OnNetworkSpawn() {
             RegisterUserServerRpc(NetworkManager.Singleton.LocalClientId);
             SpawnPlayerServerRpc(NetworkManager.Singleton.LocalClientId);
+            _gm.UpdateScores();
         }
     }
 }

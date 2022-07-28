@@ -5,7 +5,7 @@ using Unity.Netcode;
 
 public class GameManager : NetworkBehaviour {
     public NetworkVariable<bool> gamePlayable = new NetworkVariable<bool>(false);
-    private bool _gameStarted = false;
+    private NetworkVariable<bool> _gameStarted = new NetworkVariable<bool>(false);
     private bool _gameWon = false;
     private NetworkVariable<int> _score1 = new NetworkVariable<int>(0);
     private NetworkVariable<int> _score2 = new NetworkVariable<int>(0);
@@ -15,50 +15,76 @@ public class GameManager : NetworkBehaviour {
     [SerializeField] private TMPro.TextMeshProUGUI _winScreen;
     [SerializeField] private UnityEngine.UI.Image _backdrop;
 
+    void Start() {
+        _score1.OnValueChanged += ((int prev, int curr) => UpdateScores());
+        _score2.OnValueChanged += ((int prev, int curr) => UpdateScores());
+        _gameStarted.OnValueChanged += ((bool prev, bool curr) => BeginGame());
+    }
+
     public void Player1Score() {
         _score1.Value++;
-        UpdateScoresClientRpc();
-        WinCheckClientRpc();
+        WinCheck();
     }
 
     public void Player2Score() {
         _score2.Value++;
-        UpdateScoresClientRpc();
-        WinCheckClientRpc();
+        WinCheck();
     }
-    [ClientRpc]
-    void UpdateScoresClientRpc() {
-        _winScreen.enabled = false;
-        _backdrop.enabled = false;
-        _gameWon = false;
+    public void UpdateScores() {
+        if (NetworkManager.Singleton.IsServer) return;
         _player1.text = _score1.Value.ToString();
         _player2.text = _score2.Value.ToString();
     }
-    [ClientRpc]
-    void WinCheckClientRpc() {
+
+
+    void WinCheck() {
         if (_score1.Value >= 7) {
+            _gameStarted.Value = false;
+            WinClientRpc(true);
+            return;
+        } 
+        else if (_score2.Value >= 7) {
+            _gameStarted.Value = false;
+            WinClientRpc(false);
+            return;
+        }
+        ContinueClientRpc();
+    }
+
+    [ClientRpc]
+    public void WinClientRpc(bool player1) {
+        if (player1) {
             _winScreen.text = "Player 1 Wins \n \n Space Bar to Restart";
             _winScreen.enabled = true;
             _backdrop.enabled = true;
             _gameWon = true;
-            _gameStarted = false;
-        } 
-        else if (_score2.Value >= 7) {
+        }
+        else {
             _winScreen.text = "Player 2 Wins \n \n Space Bar to Restart";
             _winScreen.enabled = true;
             _backdrop.enabled = true;
             _gameWon = true;
-            _gameStarted = false;
         }
+    }
+    [ClientRpc]
+    public void ContinueClientRpc() {
+        StartCoroutine(Reset());
+    }
+    public void BeginGame() {
+        if (NetworkManager.Singleton.IsServer) return;
+        if (!_gameStarted.Value) return;
         StartCoroutine(Reset());
     }
     IEnumerator Reset() {
+        if (!_gameStarted.Value) yield break;
+        _winScreen.enabled = false;
+        _backdrop.enabled = false;
+        _gameWon = false;
         _bc.sprite.enabled = false;
-        if (_gameWon) yield break;
         yield return new WaitForSeconds(0.5f);
         _bc.sprite.enabled = true;
         yield return new WaitForSeconds(1f);
-        _bc.GameStartServerRpc();
+        _bc.PointStartServerRpc();
     }
 
     public void OnSpace() {
@@ -67,21 +93,27 @@ public class GameManager : NetworkBehaviour {
         _backdrop.enabled = false;
         if (_gameWon) {
             RestartServerRpc();
-            _gameStarted = true;
+            UpdateScores();
+            StartGameServerRpc();
             _gameWon = false;
         }
-        else if (!_gameStarted) {
-            RestartServerRpc();
-            _gameStarted = true;
-        }
+        else if (!_gameStarted.Value) StartGameServerRpc();
+    }
+
+    [ServerRpc(RequireOwnership=false)]
+    public void StartGameServerRpc() {
+        _gameStarted.Value = true;
     }
 
     [ServerRpc(RequireOwnership=false)]
     public void RestartServerRpc() {
+        RestartServer();
+    }
+    public void RestartServer() {
         _score1.Value = 0;
         _score2.Value = 0;
-        UpdateScoresClientRpc();
-        _bc.GameStart();
+        _gameStarted.Value = false;
+        _bc.Reset();
     }
 
     [ServerRpc(RequireOwnership=false)]
@@ -91,8 +123,8 @@ public class GameManager : NetworkBehaviour {
 
     [ServerRpc(RequireOwnership=false)]
     public void UnPauseServerRpc() {
+        if (NetworkManager.Singleton.ConnectedClients.Count < 2) return;
         _bc.UnPause();
-        UpdateScoresClientRpc();
         UnPauseClientRpc();
     }
 
@@ -100,7 +132,6 @@ public class GameManager : NetworkBehaviour {
     public void UnPauseClientRpc() {
         _winScreen.enabled = false;
         _backdrop.enabled = false;
-        _gameStarted = true;
     }
 
 }

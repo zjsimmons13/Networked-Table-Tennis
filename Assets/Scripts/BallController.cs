@@ -20,11 +20,11 @@ public class BallController : NetworkBehaviour {
     }
     
     [ServerRpc(RequireOwnership = false)]
-    public void GameStartServerRpc() {
-        GameStart();
+    public void PointStartServerRpc() {
+        PointStart();
     }
 
-    public void GameStart() {
+    public void PointStart() {
         if (_gameOccurring) return;
         int option = Random.Range(0, 4);
         switch (option){
@@ -56,6 +56,12 @@ public class BallController : NetworkBehaviour {
         _rb.position = Vector2.zero;
     }
 
+    public void Reset() {
+        _gameOccurring = false;
+        _rb.velocity = Vector2.zero;
+        _rb.position = Vector2.zero;
+    }
+
     public void Pause() {
         _pauseVelocity = _rb.velocity;
         _rb.velocity = Vector2.zero;
@@ -63,6 +69,6 @@ public class BallController : NetworkBehaviour {
 
     public void UnPause() {
         _rb.velocity = _pauseVelocity;
-        if (_pauseVelocity == Vector2.zero) GameStart();
+        if (_pauseVelocity == Vector2.zero) PointStart();
     }
 }
