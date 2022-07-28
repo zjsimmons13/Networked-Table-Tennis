@@ -31,8 +31,8 @@ public class GameManager : NetworkBehaviour {
         _winScreen.enabled = false;
         _backdrop.enabled = false;
         _gameWon = false;
-        _player1.text = _score1.ToString();
-        _player2.text = _score2.ToString();
+        _player1.text = _score1.Value.ToString();
+        _player2.text = _score2.Value.ToString();
     }
     [ClientRpc]
     void WinCheckClientRpc() {
