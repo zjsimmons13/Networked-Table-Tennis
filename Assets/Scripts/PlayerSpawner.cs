@@ -19,7 +19,6 @@ namespace Unity.Netcode{
             GameObject newPlayer;
             if (_user1 == clientId){
                 newPlayer=(GameObject)Instantiate(playerPrefabA);
-                //_gm.gamePlayable.Value = true;
                 NetworkObject netObj=newPlayer.GetComponent<NetworkObject>();
                 newPlayer.SetActive(true);
                 netObj.SpawnAsPlayerObject(clientId,true);
@@ -35,16 +34,12 @@ namespace Unity.Netcode{
 
         [ServerRpc(RequireOwnership=false)]
         public void RegisterUserServerRpc(ulong clientID) {
-            Debug.Log(clientID);
-            Debug.Log("Register");
             if (_user1 == 0) _user1 = clientID;
             else if (_user2 == 0) _user2 = clientID;
         }
 
         
         public void UnRegisterUser(ulong clientID) {
-            Debug.Log(clientID);
-            Debug.Log("UnRegister");
             if (_user1 == clientID) _user1 = 0;
             else if (_user2 == clientID) _user2 = 0;
         }

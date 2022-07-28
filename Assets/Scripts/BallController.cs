@@ -21,26 +21,7 @@ public class BallController : NetworkBehaviour {
     
     [ServerRpc(RequireOwnership = false)]
     public void GameStartServerRpc() {
-        if (_gameOccurring) return;
-        int option = Random.Range(0, 4);
-        switch (option){
-            case 0:
-                _rb.velocity = new Vector2(1, 1) * _speed;
-                break;
-            case 1:
-                _rb.velocity = new Vector2(-1, 1) * _speed;
-                break;
-            case 2:
-                _rb.velocity = new Vector2(1, -1) * _speed;
-                break;
-            case 3:
-                _rb.velocity = new Vector2(-1, -1) * _speed;
-                break;
-            default:
-                Debug.Log("Default case reached.");
-                break;
-        }
-        _gameOccurring = true;
+        GameStart();
     }
 
     public void GameStart() {
@@ -72,7 +53,6 @@ public class BallController : NetworkBehaviour {
         else _gm.Player2Score();
         _gameOccurring = false;
         _rb.velocity = Vector2.zero;
-        sprite.enabled = false;
         _rb.position = Vector2.zero;
     }
 
