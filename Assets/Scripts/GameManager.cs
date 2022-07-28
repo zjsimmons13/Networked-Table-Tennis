@@ -6,9 +6,10 @@ using Unity.Netcode;
 public class GameManager : NetworkBehaviour {
     public NetworkVariable<bool> gamePlayable = new NetworkVariable<bool>(false);
     private NetworkVariable<bool> _gameStarted = new NetworkVariable<bool>(false);
-    private bool _gameWon = false;
     private NetworkVariable<int> _score1 = new NetworkVariable<int>(0);
     private NetworkVariable<int> _score2 = new NetworkVariable<int>(0);
+    private bool _gameWon = false;
+    private Coroutine _reset;
     [SerializeField] private BallController _bc;
     [SerializeField] private TMPro.TextMeshProUGUI _player1;
     [SerializeField] private TMPro.TextMeshProUGUI _player2;
@@ -68,12 +69,12 @@ public class GameManager : NetworkBehaviour {
     }
     [ClientRpc]
     public void ContinueClientRpc() {
-        StartCoroutine(Reset());
+        _reset = StartCoroutine(Reset());
     }
     public void BeginGame() {
         if (NetworkManager.Singleton.IsServer) return;
         if (!_gameStarted.Value) return;
-        StartCoroutine(Reset());
+        _reset = StartCoroutine(Reset());
     }
     IEnumerator Reset() {
         if (!_gameStarted.Value) yield break;
@@ -85,6 +86,11 @@ public class GameManager : NetworkBehaviour {
         _bc.sprite.enabled = true;
         yield return new WaitForSeconds(1f);
         _bc.PointStartServerRpc();
+    }
+
+    [ClientRpc]
+    public void StopResetClientRpc() {
+        StopCoroutine(_reset);
     }
 
     public void OnSpace() {
@@ -119,6 +125,7 @@ public class GameManager : NetworkBehaviour {
     [ServerRpc(RequireOwnership=false)]
     public void PauseServerRpc() {
         _bc.Pause();
+        StopResetClientRpc();
     }
 
     [ServerRpc(RequireOwnership=false)]
