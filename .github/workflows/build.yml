@@ -48,5 +48,8 @@ jobs:
         with:
           name: Build
 
-      - name: Echo download path
-        run: echo ${{steps.download.outputs.download-path}}
+      - name: Move to download path
+        run: cd ${{steps.download.outputs.download-path}}
+
+      - name: List all files
+        run: ls -R
