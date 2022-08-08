@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.1 (07/08/2022)
+Correctly updates Changelog generation
+
+---
+
 ## Workflow creation (07/08/2022)
 ### V0.2.0
 - Creates workflow for automatic Linux build
