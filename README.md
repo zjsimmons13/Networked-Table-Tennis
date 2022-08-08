@@ -13,18 +13,18 @@
 
 # Changelog
 
-## v0.2.1 (07/08/2022)
+## v0.2.1 (08/07/2022)
 Correctly updates Changelog generation
 
 ---
 
-## Workflow creation (07/08/2022)
+## Workflow creation (08/01/2022)
 ### V0.2.0
 - Creates workflow for automatic Linux build
 - Adds auto deployment to private EC2 instance
 ---
 
-## Completed Game (07/08/2022)
+## Completed Game (07/25/2022)
 ### V0.1.0 Ready for Download
 - Fixes bugs with Server-Client Communication
 - Adds remote server capability
@@ -33,7 +33,7 @@ Correctly updates Changelog generation
 - Restarts server when both players disconnect
 ---
 
-## In-Production (07/08/2022)
+## In-Production (07/20/2022)
 ### Initial Commit
  - Adds ball physics and paddle movement
  - Creates initial draft of networking functionality
