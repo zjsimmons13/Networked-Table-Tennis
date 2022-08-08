@@ -10,5 +10,3 @@
 3. Set the IPV4 address for the server.
 
 4. Build for your server and client 
-
-OS.[CHANGELOG.md](https://github.com/zjsimmons13/Networked-Table-Tennis/files/9278032/CHANGELOG.md)
